@@ -1,0 +1,7 @@
+Prikaz analitike
+
+Povprečne kalorije (konstanta) (dodaj v users)
+
+Graf (slika)
+
+Nevarnosti (vedno iste)

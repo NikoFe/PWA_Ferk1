@@ -1,0 +1,70 @@
+.form_div {
+  background-color: white;
+  border: solid 1px gray;
+  position: absolute;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  background-color: lightgray;
+  display: flex;
+  flex-direction: column;
+}
+
+.form_div button {
+  width: fit-content;
+}
+
+.input_list_div {
+  display: flex;
+  width: 75%;
+  flex-direction: column;
+  margin-right: auto;
+  margin-left: auto;
+  justify-content: center;
+  vertical-align: center;
+}
+
+.input_row_div {
+  display: flex;
+  justify-content: center;
+  align-content: center;
+  padding: 0px;
+}
+
+.input_row_div input[type="text"] {
+  width: 500px;
+  margin: 10px;
+  height: fit-content;
+}
+
+.input_row_div input[type="number"] {
+  margin: 10px;
+  height: fit-content;
+}
+
+.input_list_div input {
+  height: 15px;
+}
+
+.input_list_div button {
+  height: fit-content;
+  align-self: center;
+}
+
+.signin_div {
+  width: 100%;
+  height: 2000px;
+  background-color: palevioletred;
+  position: absolute;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.signin_div input {
+  width: 200px;
+}
+
+.signin_div button {
+  width: fit-content;
+}

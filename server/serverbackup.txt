@@ -1,0 +1,111 @@
+const createError = require('http-errors');
+const express = require('express');
+const path = require('path');
+const cookieParser = require('cookie-parser');
+const logger = require('morgan');
+const cors = require("cors");
+const fs = require('fs')
+
+
+const app = express();
+app.use(cors());
+//app.use(cors);
+const PORT = 5000;
+
+const readfile = (path) => {
+//    jsons/users.json
+// Read JSON file
+fs.readFile(path, 'utf-8', (err, data) => {
+    if (err) {
+        console.error("Error reading the file:", err);
+        return;
+    }
+    try {
+        // Parse JSON data
+        const jsonArray = JSON.parse(data);
+        return jsonArray;
+        // Write JSON array to another file
+        fs.writeFile('output.json', JSON.stringify(jsonArray, null, 2), (err) => {
+            if (err) {
+                console.error("Error writing to the file:", err);
+            } else {
+                console.log("JSON array saved to output.json");
+            }
+        });
+    } catch (parseErr) {
+        console.error("Error parsing JSON:", parseErr);
+    }
+});
+}
+
+// view engine setup
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'jade');
+
+app.use(logger('dev'));
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+app.use(cookieParser());
+app.use(express.static(path.join(__dirname, 'public')));
+
+
+
+app.get("/statistics", (req,res) => {
+
+res.status(200).send({
+ message: "SUCCESS"
+}
+)
+
+})
+
+app.get("/users", (req,res) => {
+
+const jsonarray = readfile(jsons/users.json);
+try{
+
+
+/*or (let i=0; i<jsonarray.length; i++){
+
+    console.log("name: "+jsonarray[0].name+"\n")  
+}*/
+res.status(201).send({ 
+    message: jsonarray
+  })
+
+}catch (error){
+   // console.log("JSON ARRAY Error : "+ error)
+   res.status(500).send({ 
+     message: error
+   })
+}
+
+})
+
+app.listen(PORT, () => console.log( `Listening on ${PORT}... `))
+module.exports = app;
+
+
+
+/*
+var indexRouter = require('./routes/index');
+var usersRouter = require('./routes/users');
+
+app.use('/', indexRouter);
+app.use('/users', usersRouter);
+
+app.use(function(req, res, next) {
+  next(createError(404));
+});
+
+// error handler
+app.use(function(err, req, res, next) {
+  // set locals, only providing error in development
+  res.locals.message = err.message;
+  res.locals.error = req.app.get('env') === 'development' ? err : {};
+
+  // render the error page
+  res.status(err.status || 500);
+  res.render('error');
+});
+*/

@@ -1,0 +1,162 @@
+import { useState, useEffect } from "react";
+import SignIn from "./components/SignIn";
+import "./App.css";
+import axios from "axios";
+import Creating from "./components/Creating";
+import Updating from "./components/Updating";
+
+//const API_URL="h"
+const API_URL = "http://localhost:3000";
+
+const getEntry = async () => {
+  console.log("GETTING");
+  try {
+    const response = await axios.get(API_URL + "/statistics");
+    console.log("RESPONSE: " + response[0]);
+    //alert("GETTING")
+  } catch (error) {}
+};
+
+
+function App() {
+  const [loggedIn, setLoggedIn] = useState(0);
+  const [meals, setMeals] = useState([]);
+  const [creating , setCreating] = useState(true);
+  const [refresh, setRefresh] = useState(true);
+  const [updating, setUpdating] = useState(true);
+  const [newName, setNewName] = useState(0);
+  const [mealId, setMealId] = useState(0);
+  const [ingredients, setIngredients] = useState([
+    { name: "", amount: 0, calories: 0 },
+    { name: "", amount: 0, calories: 0 },
+    { name: "", amount:0, calories: 0 },
+  ]);
+
+  const [name, setName] = useState("");
+  const [count, setCount] = useState(0);
+
+
+  const deleteMeal = async (idParam) => {
+    console.log("DELETING "+API_URL + "/meals/"+idParam);
+    try {
+      const response = await axios.delete(API_URL + "/meals/"+idParam
+    );
+
+      console.log("delete RESPONSE: " + response[0]);
+      setLoggedIn(true)
+     // setRefresh(!refresh)
+      //alert("GETTING")
+    } catch (error) {
+      console.log("DELETE ERROR: "+error);
+    }
+  };
+
+  useEffect(() => {
+    const fetchMeals = async () => {
+      try {
+        const response = await axios.get(API_URL + "/meals");
+        
+        setMeals(response.data); // Store data in state if needed
+      } catch (error) {
+        console.log("ERROR!!!!!!!!: ", error);
+      }
+    };
+    fetchMeals(); // Call the async function inside useEffect
+  }, []);
+
+  return (
+    <>
+    {creating &&(
+   <>
+   <Creating 
+   setMeals={setMeals}
+   newName={newName}
+   setNewName={setNewName}
+   ingredients={ingredients}
+   setIngredients={setIngredients}
+   >
+   </Creating>
+   </>
+     )}
+    {updating &&(
+   <>
+   <Updating 
+   setUpdating ={setUpdating}
+   setMeals={setMeals}
+   newName={newName}
+   setNewName={setNewName}
+   ingredients={ingredients}
+   setIngredients={setIngredients}
+   mealId={mealId}
+   >
+   </Updating>
+   </>
+     )}
+
+      {loggedIn && (
+        <>
+          <button onClick={getEntry}>GET STATISTICS </button>
+          <div className="ingredients-div">
+            <h1>INGREDIENTS: </h1>
+            <button onClick={()=>{setCreating(true)}}>CREATE MEAL</button>
+            {meals.map((meal, index) => (
+              <div key={index} className="ingredient-div">
+                <strong> {meal.name} </strong>
+
+                {meal.ingredients.map((ing, index) => (
+                  <p> {ing.name + " " + ing.amount+"g "+ing.calories+"cal"} </p>
+                ))}
+                <div className="horizontal-flex">
+
+                <strong>MEAL ID: {meal.id} </strong>
+                  <button onClick={()=>{
+
+                  setNewName(meal.name)
+                  setIngredients(meal.ingredients)
+                  setMealId(meal.id)
+                  }}
+            
+                  >UPDATE</button>
+             
+                  <button  onClick={()=>{deleteMeal(meal.id)}} >DELETE</button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+
+      {/*////////////////////////////*/}
+      {!loggedIn && (
+        <SignIn
+          setLoggedIn={(value) => {
+            setLoggedIn(value);
+          }}
+          setName={(value) => {
+            setName(value);
+          }}
+        ></SignIn>
+      )}
+    </>
+  );
+}
+
+export default App;
+/*
+const  getUsers = async () => {
+  console.log("USERS")
+   try{
+    const response= await axios.get(API_URL+"/users")
+    console.log("USERS RESPONSE: "+ response.data[1].name)
+  
+    for (let i=0; i<response.length; i++){
+      console.log("Name: "+ response.data[1].name)
+    }
+    
+    //alert("GETTING")
+    
+   } catch (error){
+    console.log("ERRROR!!!!!!!!: "+ error)
+   }
+ }
+*/

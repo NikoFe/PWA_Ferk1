@@ -1,0 +1,210 @@
+const createError = require('http-errors');
+const express = require('express');
+const path = require('path');
+const cookieParser = require('cookie-parser');
+const logger = require('morgan');
+const cors = require("cors");
+//const fs = require('fs')
+
+const fs = require('fs').promises;
+
+
+const app = express();
+app.use(cors());
+//app.use(cors);
+const PORT = 3000;
+
+const readfile = async (path) => {
+  try {
+    const data = await fs.readFile(path, 'utf-8');
+    return JSON.parse(data);
+  } catch (err) {
+    console.error("Error reading or parsing file:", err);
+    throw err;
+  }
+};
+
+
+// view engine setup
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'jade');
+
+app.use(logger('dev'));
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+app.use(cookieParser());
+app.use(express.static(path.join(__dirname, 'public')));
+
+app.get("/statistics", (req,res) => {
+
+res.status(200).send({
+ message: "SUCCESS"
+}
+)
+})
+
+
+app.get("/meals", async (req,res) => {
+  try{
+      const jsonarray = await readfile("jsons/meals.json"); // Await it!
+      res.status(201).json(jsonarray); // Send the actual data
+  
+  }catch (error){
+     // console.log("JSON ARRAY Error : "+ error)
+     res.status(500).send({ 
+       message: error
+     })
+  }
+  })
+
+
+  app.delete("/meals/:id", async (req, res) => {
+
+    try {
+
+      console.log("Incoming Body:",req.params); // Log incoming data
+  
+      const jsonarray = await fs.readFile("jsons/meals.json", 'utf-8'); 
+
+      let data = JSON.parse(jsonarray);
+
+      const id = req.params.id;
+      console.log("id to delete:", id);
+      const result = data.filter((meal) => meal.id != id);
+
+      console.log("|||||||||||||RESULT: "+result)
+
+      await fs.writeFile("jsons/meals.json", JSON.stringify(result, null, 2));
+  
+      // Respond with the updated data
+      res.status(201).json(result);
+      
+    } catch (error) {
+      console.log("JSON ARRAY Error:", error.message);
+      res.status(500).send({ message: error.message });
+    }
+  });
+
+    app.post("/meals", async (req, res) => {
+      try {
+        console.log("Incoming Body:", JSON.stringify(req.body, null, 2)); // Log incoming data
+    
+        const jsonarray = await fs.readFile("jsons/meals.json", 'utf-8'); 
+        console.log("Raw JSON String:", jsonarray);
+    
+        let data = JSON.parse(jsonarray);
+  
+        const newElement = req.body.newMeal || req.body;
+        console.log("New Element to Add:", newElement);
+
+        data.push(newElement);
+    
+        await fs.writeFile("jsons/meals.json", JSON.stringify(data, null, 2));
+    
+        res.status(201).json(data);
+      } catch (error) {
+        console.log("JSON ARRAY Error:", error.message);
+        res.status(500).send({ message: error.message });
+      }
+    });
+    
+
+
+    app.put("/meals/:id", async (req, res) => {
+      try {
+
+       // const { paramId, name, ingredients } = req.query;
+
+     
+        const jsonarray = await fs.readFile("jsons/meals.json", 'utf-8'); 
+
+        let meals = JSON.parse(jsonarray);
+        const { name, ingredients } = req.body;
+
+        mealId=  req.params.id
+        console.log("ID:", req.params.id);
+        console.log("Name:", name);
+        console.log("Ingredients (Raw):", ingredients);
+
+
+        // Find the meal by ID
+        const mealIndex = meals.findIndex(meal => meal.id == mealId);
+        if (mealIndex === -1) {
+          return res.status(404).json({ message: "Meal not found" });
+        }
+
+        // Update the meal
+        meals[mealIndex] = { ...meals[mealIndex], name, ingredients };
+
+        // Save back to file
+        await fs.writeFile("jsons/meals.json", JSON.stringify(meals, null, 2));
+
+        res.json(meals[mealIndex]);
+
+        /*
+        console.log("Incoming Body:", JSON.stringify(req.body, null, 2)); // Log incoming data
+    
+        const jsonarray = await fs.readFile("jsons/meals.json", 'utf-8'); 
+        console.log("Raw JSON String:", jsonarray);
+    
+        let data = JSON.parse(jsonarray);
+  
+        const newElement = req.body.newMeal || req.body;
+        console.log("New Element to Add:", newElement);
+
+        data.push(newElement);
+    
+        await fs.writeFile("jsons/meals.json", JSON.stringify(data, null, 2));
+    
+        res.status(201).json(data);*/
+      } catch (error) {
+        console.log("JSON ARRAY Error:", error.message);
+        res.status(500).send({ message: error.message });
+      }
+    });
+    
+
+
+
+
+
+    
+app.get("/users", async (req,res) => {
+
+try{
+    const jsonarray = await readfile("jsons/users.json"); // Await it!
+    res.status(201).json(jsonarray); // Send the actual data
+
+}catch (error){
+   // console.log("JSON ARRAY Error : "+ error)
+   res.status(500).send({ 
+     message: error
+   })
+}
+})
+
+app.listen(PORT, () => console.log( `Listening on ${PORT}... `))
+module.exports = app;
+
+/*
+var indexRouter = require('./routes/index');
+var usersRouter = require('./routes/users');
+
+app.use('/', indexRouter);
+app.use('/users', usersRouter);
+
+app.use(function(req, res, next) {
+  next(createError(404));
+});
+
+// error handler
+app.use(function(err, req, res, next) {
+  // set locals, only providing error in development
+  res.locals.message = err.message;
+  res.locals.error = req.app.get('env') === 'development' ? err : {};
+
+  // render the error page
+  res.status(err.status || 500);
+  res.render('error');
+});
+*/

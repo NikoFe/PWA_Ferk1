@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="theme-color" content="#000000" />
+  <link rel="apple-touch-icon" href="/fork_and_spoon.png" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Progressive Web App</title>
+  <!-- Add PWA meta tags here -->
+</head>
+<body>
+
+
+<script>
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/service-worker.js')
+      .then(reg => {
+        console.log('[Service Worker] Registered:', reg.scope);
+      })
+      .catch(err => {
+        console.error('[Service Worker] Registration failed:', err);
+      });
+  });
+}
+</script>
+
+
+  <!-- Your app content goes here -->
+</body>
+</html>
