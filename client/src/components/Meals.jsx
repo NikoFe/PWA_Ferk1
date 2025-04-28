@@ -7,6 +7,34 @@ const Meals = ({ meals, setNewName, setIngredients, setMealId, setMeals, deleteM
   const [show, setShow] = useState(false);
 
   const fetchProtectedData = async () => {
+   
+    if (!navigator.onLine) {
+      try{
+    console.log("MEAL GET OFFLINE ERROR!")
+
+    const latestMeals = localStorage.getItem("latestMeals");
+    if (latestMeals) {
+      console.log("A")
+      setMeals(JSON.parse(latestMeals));
+    }
+    console.log("B")
+
+    setShow(true)
+    //navigate("/")
+    }
+
+    catch (err) {
+      {
+        alert("MEAL DENIED ERROR!!!");
+      
+       // navigate("/")
+        console.error(err);
+      }
+
+    }
+    }
+
+    else {
     try {
       let accessToken = localStorage.getItem("accessToken");
 
@@ -17,36 +45,30 @@ const Meals = ({ meals, setNewName, setIngredients, setMealId, setMeals, deleteM
       const res = await axios.get("http://localhost:3000/meals", {
         headers,
       });
-
+      console.log("ARRAY: ",res.data)
+      console.log("STRING ARRAY: ",JSON.stringify(res.data))
       setMeals(res.data.array);
-      setShow(true)
+      localStorage.setItem("latestMeals",JSON.stringify(res.data.array) );
+      let jsonArrayTest= JSON.parse(localStorage.getItem("latestMeals"))
+      console.log("JSON TEST: ",jsonArrayTest)
+
+
       console.log("SUCCESS ", res.data.array);
       return
     } catch (err) {
-        /*
-      if (err.status === 403) {
-        setMeals("");
-        console.log("Refreshing token...");
-        const refreshRes = await axios.post(
-          "http://localhost:3000/refresh",
-          {},
-          { withCredentials: true }
-        );
-        localStorage.setItem("accessToken", refreshRes.data.accessToken);
-        fetchProtectedData(); // Retry with new token
-      } 
-      
-      else*/ {
+      {
         alert("access to meals denied!");
-        setMeals("");
+      
         navigate("/")
         console.error(err);
       }
     }
+  }
+
   };
 
   useEffect(() => {
-    setShow(false);
+    setShow(true);
     fetchProtectedData();
   }, []);
 

@@ -76,5 +76,31 @@
         "calories": "155"
       }
     ]
+  },
+  {
+    "id": 5000,
+    "name": "M400",
+    "ingredients": [
+      {
+        "name": "I5555",
+        "amount": "1",
+        "calories": "1"
+      },
+      {
+        "name": "I10",
+        "amount": "11",
+        "calories": "1"
+      },
+      {
+        "name": "I11",
+        "amount": "1",
+        "calories": "1"
+      },
+      {
+        "name": "I12",
+        "amount": "1",
+        "calories": "155"
+      }
+    ]
   }
 ]

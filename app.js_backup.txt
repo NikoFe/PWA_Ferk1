@@ -126,7 +126,7 @@ app.post("/users", async (req,res) => {
 })*/
 
 app.get("/meals", async (req,res) => {
-  try{
+
   const authHeader = req.headers.authorization;
   //const token = authHeader.split(" ")[1] && authHeader;
   const token = authHeader && authHeader.split(" ")[1];
@@ -139,24 +139,21 @@ app.get("/meals", async (req,res) => {
   jwt.verify(token, SECRET_KEY, async (err,user) => {
       if (err) return res.status(403).json({ error: "Invalid token" });
  
-
+     try{
        
       const jsonarray =  await readfile("./../client/public/jsons/meals.json"); // Await it!
       return res.status(201).json( { array:jsonarray  }  ); // Send the actual data
      
-   
-
-    });
-  }
+    }
     catch(error){
-      console.error("GET MEALS ERROR:", error);
+      console.error("File read error:", error);
       return res.status(500).json({ error: "Internal server error" });
     }
+    });
   })
 
 
 app.post("/refresh", (req, res) => {
-  try{
   const refreshToken = req.cookies.refreshToken;
   if (!refreshToken || !REFRESH_TOKENS.has(refreshToken)) {
       return res.status(403).json({ error: "Unauthorized" });
@@ -172,11 +169,6 @@ app.post("/refresh", (req, res) => {
       res.cookie("refreshToken", newRefreshToken, { httpOnly: true, secure: true });
       res.json({ accessToken });
   });
-}
-catch(error){
-  console.error("REFRESH ERROR:", error);
-  return res.status(500).json({ error: "Internal server error" });
-}
 });
 
 

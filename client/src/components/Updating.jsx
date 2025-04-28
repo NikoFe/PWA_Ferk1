@@ -44,9 +44,41 @@ const handleInputChange = (index, field, value) => {
     updatedIngredients[index][field] = value;
     setIngredients(updatedIngredients);
   };
-
-  const updateMealFunction= async () => {
+ 
+  const updateMealFunction= async () => {//////////////////////////////////////////////////////////////////
     //console.log("updating: "+JSON.stringify(newMeal));
+
+    if (!navigator.onLine) {
+      try{
+    console.log("MEAL UPDATE OFFLINE")
+
+    let i=1;
+    let updateString="update"+i;
+
+    while(localStorage.getItem(updateString)!=""  && localStorage.getItem(updateString)){
+    console.log("~~~~~~~~~~~~~",updateString,"~~~~~~~~~~~~~" )
+    console.log("^^^^^^^",localStorage.getItem(updateString),"^^^^^^^")
+    i++;
+    updateString="update"+i;
+    }
+
+    const updatedMeal = {
+      id: mealId,
+      name: newName,
+      ingredients,
+    };
+    localStorage.setItem(updateString, JSON.stringify(updatedMeal))
+   
+    }
+    catch (err) {
+      {
+        alert("OFFLINE UPDATE ERROR!!!");
+      
+       // navigate("/")
+        console.error(err);
+      }
+    }
+    }  //OFFLINE
 
     console.log("UPDATING MEALS");
     try {
@@ -68,11 +100,7 @@ const handleInputChange = (index, field, value) => {
         )
       );
      navigate("/")
-
-      
     }
-     // console.log("!!!!!!!!!!!!!!!!!UPDATING RESPONSE: " +  response.data);
-      //alert("GETTING")
      catch (error) {
   
     console.log ("ERROR CREATING MEALS: "+error)

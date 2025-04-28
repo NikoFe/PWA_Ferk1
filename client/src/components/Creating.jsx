@@ -37,6 +37,36 @@ const Creating = ({ setMeals,newName, setNewName,ingredients, setIngredients}) =
   const createMealFunction= async (newMeal) => {
     console.log("NEWNEWNEW: "+JSON.stringify(newMeal));
 
+
+    if (!navigator.onLine) {
+      try{
+    console.log("MEAL CREATE OFFLINE")
+
+    let i=1;
+    let createString="create"+i;
+
+    while(localStorage.getItem(createString)!=""  && localStorage.getItem(createString)){
+    console.log("~~~~~~~~~~~~~",createString,"~~~~~~~~~~~~~" )
+    console.log("^^^^^^^",localStorage.getItem(createString),"^^^^^^^")
+    i++;
+    createString="create"+i;
+    }
+
+
+    localStorage.setItem(createString, JSON.stringify(newMeal))
+   
+    }
+    catch (err) {
+      {
+        alert("OFFLINE UPDATE ERROR!!!");
+      
+       // navigate("/")
+        console.error(err);
+      }
+    }
+    }  //OFFLINE
+   else {
+
     console.log("CREATING MEALS");
     try {
       //await axios.post(API_URL + "/meals", newMeal);
@@ -53,8 +83,12 @@ const Creating = ({ setMeals,newName, setNewName,ingredients, setIngredients}) =
   
     }
   }
+
+
+
+  }
   
-  const mealStateFunction = (
+  const creatingFunction = (
 ) => {
     let filled =true;
 
@@ -140,7 +174,7 @@ const Creating = ({ setMeals,newName, setNewName,ingredients, setIngredients}) =
         </div>
       ))}
 
-      <button onClick={mealStateFunction}> CREATE</button>
+      <button onClick={creatingFunction}> CREATE</button>
 
   
     </div>

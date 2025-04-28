@@ -12,6 +12,16 @@ import Meals from "./components/Meals";
 //const API_URL="h"
 const API_URL = "http://localhost:3000";
 
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker
+      .register("/serviceWorker.js")
+      .then(res => console.log("Service Worker registered"))
+      .catch(err => console.log("Service Worker not registered", err));
+  });
+}
+
+
 const getEntry = async () => {
   console.log("GETTING");
   try {
@@ -39,6 +49,35 @@ function App() {
   const [count, setCount] = useState(0);
 
   const deleteMeal = async (idParam) => {
+
+    if (!navigator.onLine) {
+      try{
+    console.log("MEAL DELETE OFFLINE")
+
+    let i=1;
+    let deleteString="delete"+i;
+
+    while(localStorage.getItem(deleteString)!=""  && localStorage.getItem(deleteString)){
+    console.log("~~~~~~~~~~~~~",deleteString,"~~~~~~~~~~~~~" )
+    console.log("^^^^^^^",localStorage.getItem(deleteString),"^^^^^^^")
+    i++;
+    deleteString="delete"+i;
+    }
+
+
+    localStorage.setItem(deleteString, idParam)
+   
+    }
+    catch (err) {
+      {
+        alert("OFFLINE UPDATE ERROR!!!");
+      
+       // navigate("/")
+        console.error(err);
+      }
+    }
+    }  //OFFLINE
+
     console.log("DELETING " + API_URL + "/meals/" + idParam);
     try {
       const response = await axios.delete(API_URL + "/meals/" + idParam);
