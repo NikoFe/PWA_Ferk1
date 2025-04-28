@@ -10,14 +10,15 @@ const Meals = ({ meals, setNewName, setIngredients, setMealId, setMeals, deleteM
    
     if (!navigator.onLine) {
       try{
-    console.log("MEAL GET OFFLINE ERROR!")
+    console.log("MEAL GET OFFLINE 2.0 !")
 
+    /*
     const latestMeals = localStorage.getItem("latestMeals");
     if (latestMeals) {
       console.log("A")
       setMeals(JSON.parse(latestMeals));
     }
-    console.log("B")
+    console.log("B")*/
 
     setShow(true)
     //navigate("/")
@@ -47,6 +48,7 @@ const Meals = ({ meals, setNewName, setIngredients, setMealId, setMeals, deleteM
       });
       console.log("ARRAY: ",res.data)
       console.log("STRING ARRAY: ",JSON.stringify(res.data))
+      console.log("33333333333333333")
       setMeals(res.data.array);
       localStorage.setItem("latestMeals",JSON.stringify(res.data.array) );
       let jsonArrayTest= JSON.parse(localStorage.getItem("latestMeals"))

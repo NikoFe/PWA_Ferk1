@@ -8,7 +8,7 @@ const API_URL = "http://localhost:3000";
 
 
 
-const Updating = ({setUpdating, setMeals,newName, setNewName,ingredients, setIngredients, mealId }) => {
+const Updating = ({setUpdating, setMeals,newName, setNewName,ingredients, setIngredients, mealId,updateMealFunction }) => {
   const navigate = useNavigate();
   const [showUpdating, setShowUpdating] = useState(false);
 
@@ -44,7 +44,15 @@ const handleInputChange = (index, field, value) => {
     updatedIngredients[index][field] = value;
     setIngredients(updatedIngredients);
   };
+
+const update= () =>{
+  updateMealFunction();
+  navigate("/meals")
+
+}
+
  
+  /*
   const updateMealFunction= async () => {//////////////////////////////////////////////////////////////////
     //console.log("updating: "+JSON.stringify(newMeal));
 
@@ -106,7 +114,7 @@ const handleInputChange = (index, field, value) => {
     console.log ("ERROR CREATING MEALS: "+error)
   
     }
-  }
+  }*/
 
   const mealStateFunction = (
 ) => {
@@ -182,7 +190,7 @@ return (
         </div>
       ))}
 
-      <button onClick={updateMealFunction}> UPDATE</button>
+      <button onClick={()=>{update()}}> UPDATE</button>
     </div>
    }
 </>

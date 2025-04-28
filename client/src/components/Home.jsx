@@ -81,8 +81,6 @@ const Home = ({
        REFRESH
       </button>
 
-
-
       <button
         onClick={() => {
           navigate("/meals");
@@ -90,6 +88,57 @@ const Home = ({
       >
         SHOW MEALS
       </button>
+
+      <button
+    
+        onClick={() => {
+          console.log("SHOW CACHE")
+          console.log("____________________________________________________________________")
+          let i=1
+          let createString="create"+i;
+        while(localStorage.getItem(createString)!=""  && localStorage.getItem(createString)){
+        console.log("~~~~~~~~~~~~~",createString,"~~~~~~~~~~~~~" )
+        console.log("^^^^^^^",JSON.stringify(localStorage.getItem(createString)),"^^^^^^^")
+        i++;
+        createString="create"+i;
+        }
+        i=1
+        let updateString="update"+i;
+        while(localStorage.getItem(updateString)!=""  && localStorage.getItem(updateString)){
+        console.log("~~~~~~~~~~~~~",updateString,"~~~~~~~~~~~~~" )
+        console.log("^^^^^^^",JSON.stringify(localStorage.getItem(updateString)),"^^^^^^^")
+        i++;
+        updateString="update"+i;
+        }
+        i=1
+        let deleteString="delete"+i;
+        while(localStorage.getItem(deleteString)!=""  && localStorage.getItem(deleteString)){
+        console.log("~~~~~~~~~~~~~",deleteString,"~~~~~~~~~~~~~" )
+        console.log("^^^^^^^",JSON.stringify(localStorage.getItem(deleteString)),"^^^^^^^")
+        i++;
+        deleteString="update"+i;
+
+      }
+      //localStorage.clear()
+      console.log("____________________________________________________________________")
+      }}
+      >
+        SHOW CACHE
+      </button>
+
+
+      <button
+        onClick={() => {
+        console.log("DELETE CACHE")
+         localStorage.clear()
+        }}
+      >
+        DELETE CACHE
+      </button>
+
+
+
+
     </>
   );
 };

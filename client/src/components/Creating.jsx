@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
-const Creating = ({ setMeals,newName, setNewName,ingredients, setIngredients}) => {
+const Creating = ({ setMeals,newName, setNewName,ingredients, setIngredients, createMealFunction}) => {
   const navigate = useNavigate()
   const [showCreation, setShowCreation] = useState(false);
 
@@ -11,10 +11,14 @@ const Creating = ({ setMeals,newName, setNewName,ingredients, setIngredients}) =
 
   const fetchProtectedData = async () => {
     try {
+       setShowCreation(false);
         let accessToken = localStorage.getItem("accessToken");
        
         const headers = accessToken ? { Authorization: `Bearer ${accessToken}` } : {}
         console.log(headers)
+
+
+      
         const res = await axios.get("http://localhost:3000/protected", {
          headers 
         });
@@ -22,45 +26,44 @@ const Creating = ({ setMeals,newName, setNewName,ingredients, setIngredients}) =
          //setData(res.data.message);
     } catch (err) {
       {
-            alert("access denied!")
+            alert("access denied22!")
             navigate("/")
             console.error(err);
         }
     }
 };
   useEffect(() => {
-    setShowCreation(false);
-    fetchProtectedData();
+
+   
+    console.log("useEffect");
+    setShowCreation(true)
+
+
+
+
+   // fetchProtectedData();
   }, []);
 
-
+   /*
   const createMealFunction= async (newMeal) => {
     console.log("NEWNEWNEW: "+JSON.stringify(newMeal));
-
-
     if (!navigator.onLine) {
       try{
     console.log("MEAL CREATE OFFLINE")
-
     let i=1;
     let createString="create"+i;
-
     while(localStorage.getItem(createString)!=""  && localStorage.getItem(createString)){
     console.log("~~~~~~~~~~~~~",createString,"~~~~~~~~~~~~~" )
     console.log("^^^^^^^",localStorage.getItem(createString),"^^^^^^^")
     i++;
     createString="create"+i;
     }
-
-
     localStorage.setItem(createString, JSON.stringify(newMeal))
-   
+  
     }
     catch (err) {
       {
         alert("OFFLINE UPDATE ERROR!!!");
-      
-       // navigate("/")
         console.error(err);
       }
     }
@@ -69,25 +72,19 @@ const Creating = ({ setMeals,newName, setNewName,ingredients, setIngredients}) =
 
     console.log("CREATING MEALS");
     try {
-      //await axios.post(API_URL + "/meals", newMeal);
-      
       const response = await axios.post(API_URL + "/meals", {
         newMeal: newMeal,
       })
-    
       console.log("!!!!!!!!!!!!!!!!!CREATING RESPONSE: " +  response.data);
       //alert("GETTING")
     } catch (error) {
   
     console.log ("ERROR CREATING MEALS: "+error)
-  
+
     }
   }
-
-
-
   }
-  
+  */
   const creatingFunction = (
 ) => {
     let filled =true;
@@ -109,7 +106,8 @@ const Creating = ({ setMeals,newName, setNewName,ingredients, setIngredients}) =
             name: newName,
             ingredients,
           };
-
+          
+             if (navigator.onLine) {
           setMeals(prevMeals => [...prevMeals, newMeal]);
           setNewName("");
           setIngredients([
@@ -117,10 +115,11 @@ const Creating = ({ setMeals,newName, setNewName,ingredients, setIngredients}) =
             { name: "", amount: "", calories: "" },
             { name: "", amount: "", calories: "" },
           ]);
-
+        }
 
 
           createMealFunction(newMeal)
+          navigate("/")
          //  createMeal(newMeal)
        }
       else  {

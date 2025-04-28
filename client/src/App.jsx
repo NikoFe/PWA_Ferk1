@@ -21,7 +21,6 @@ if ("serviceWorker" in navigator) {
   });
 }
 
-
 const getEntry = async () => {
   console.log("GETTING");
   try {
@@ -45,28 +44,159 @@ function App() {
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [name, setName] = useState("");
-  const [count, setCount] = useState(0);
+  const [isOnline, setIsOnline]= useState(true)
 
+  const handleCheck = ()=>{
+    console.log("ONLINE CHECK!!!!!!!!!!!!!!!!!!")
+    setIsOnline(navigator.isOnline)
+
+    if(navigator.isOnline){
+      console.log(    navigator.isOnline)
+      console.log("*** IS ONLINE")
+    }
+    else{
+      console.log(    navigator.isOnline)
+      console.log("*** NOT ONLINE ******************************************************************************")
+
+         
+
+            let i=1
+            let createString="create"+i;
+            console.log(localStorage.getItem(createString))
+            console.log(localStorage.getItem(createString="create"+i))
+            while(localStorage.getItem(createString)!=""  && localStorage.getItem(createString)){
+
+
+
+                let parsedCreate = JSON.parse(localStorage.getItem(createString)); // just parse directly!
+                console.log("CREATINGCREATINGCREATINGCREATINGCREATINGCREATINGCREATINGCREATINGCREATINGCREATING")
+                createMealFunction(parsedCreate);
+                localStorage.removeItem(createString)
+
+     
+          //  createMealFunction(parsedCreate)
+
+                i++;
+                createString="create"+i;
+        
+            }
+          
+      console.log("********************************************************************************")
+
+    }
+  }
+
+  useEffect(() => {
+   // window.addEventListener('online',   console.log("ONLINE CHECK: !" ));
+     //handleCheck()
+    //return () => window.removeEventListener('online', fetchProtectedData);
+   window.addEventListener("online",handleCheck )
+  // window.addEventListener("offline",handleCheck )
+  }, []);
+  
   const deleteMeal = async (idParam) => {
-
     if (!navigator.onLine) {
       try{
     console.log("MEAL DELETE OFFLINE")
-
     let i=1;
     let deleteString="delete"+i;
-
     while(localStorage.getItem(deleteString)!=""  && localStorage.getItem(deleteString)){
-    console.log("~~~~~~~~~~~~~",deleteString,"~~~~~~~~~~~~~" )
-    console.log("^^^^^^^",localStorage.getItem(deleteString),"^^^^^^^")
+    //console.log("~~~~~~~~~~~~~",deleteString,"~~~~~~~~~~~~~" )
+    //console.log("^^^^^^^",localStorage.getItem(deleteString),"^^^^^^^")
     i++;
     deleteString="delete"+i;
     }
-
-
     localStorage.setItem(deleteString, idParam)
-   
+    }
+    catch (err) {
+      {
+        alert("OFFLINE UPDATE ERROR!!!");
+        console.error(err);
+      }
+    }
+    }  
+    else {
+    
+    //OFFLINE
+    console.log("DELETING " + API_URL + "/meals/" + idParam);
+    try {
+      const response = await axios.delete(API_URL + "/meals/" + idParam);
+      console.log("delete RESPONSE: " + response[0]);
+      setLoggedIn(true);
+    } catch (error) {
+      console.log("DELETE ERROR: " + error);
+    }
+  }
+  };
+  const createMealFunction= async (newMeal) => {
+    console.log("NEWNEWNEW: "+JSON.stringify(newMeal));
+    if (!navigator.onLine) {
+      try{
+    console.log("MEAL CREATE OFFLINE")
+    let i=1;
+    let createString="create"+i;
+    while(localStorage.getItem(createString)!=""  && localStorage.getItem(createString)){
+    //console.log("~~~~~~~~~~~~~",createString,"~~~~~~~~~~~~~" )
+    //console.log("^^^^^^^",localStorage.getItem(createString),"^^^^^^^")
+    i++;
+    createString="create"+i;
+    }
+    localStorage.setItem(createString, JSON.stringify(newMeal))
+    }
+    catch (err) {
+      {
+        alert("OFFLINE CREATE ERROR!!!");   
+        console.error(err);
+      }
+    }
+    }  //OFFLINE
+   else {
+    console.log("CREATING MEALS");
+    try {
+      //await axios.post(API_URL + "/meals", newMeal);
+      const response = await axios.post(API_URL + "/meals", {
+        newMeal: newMeal,
+      })
+      console.log("!!!!!!!!!!!!!!!!!CREATING RESPONSE: " +  response.data);
+      //alert("GETTING")
+    } catch (error) {
+    console.log ("ERROR CREATING MEALS: "+error)
+    }
+  }
+  }
+  useEffect(() => {
+    const fetchMeals = async () => {
+      try {
+        const response = await axios.get(API_URL + "/meals");
+        setMeals(response.data); // Store data in state if needed
+      } catch (error) {
+        console.log("FETCH MEALS ERROR!!!!!!!!: ", error);
+      }
+    };
+    fetchMeals(); // Call the async function inside useEffect
+  }, []);
+  
+  const updateMealFunction= async () => {//////////////////////////////////////////////////////////////////
+    //console.log("updating: "+JSON.stringify(newMeal));
+    if (!navigator.onLine) {
+      try{
+    console.log("MEAL UPDATE OFFLINE")
+
+    let i=1;
+    let updateString="update"+i;
+    while(localStorage.getItem(updateString)!=""  && localStorage.getItem(updateString)){
+    //console.log("~~~~~~~~~~~~~",updateString,"~~~~~~~~~~~~~" )
+    //console.log("^^^^^^^",localStorage.getItem(updateString),"^^^^^^^")
+    i++;
+    updateString="update"+i;
+    }
+    const updatedMeal = {
+      id: mealId,
+      name: newName,
+      ingredients,
+    };
+    console.log("storing new IIIII: ",updateString )
+    localStorage.setItem(updateString, JSON.stringify(updatedMeal))
     }
     catch (err) {
       {
@@ -77,34 +207,30 @@ function App() {
       }
     }
     }  //OFFLINE
-
-    console.log("DELETING " + API_URL + "/meals/" + idParam);
+    console.log("UPDATING MEALS");
     try {
-      const response = await axios.delete(API_URL + "/meals/" + idParam);
 
-      console.log("delete RESPONSE: " + response[0]);
-      setLoggedIn(true);
-      // setRefresh(!refresh)
-      //alert("GETTING")
-    } catch (error) {
-      console.log("DELETE ERROR: " + error);
+      const updatedMeal = {
+        id: mealId,
+        name: newName,
+        ingredients,
+      };
+      console.log("URL: "+API_URL + "/meals/" +mealId,updatedMeal)
+      const response = await axios.put(API_URL + "/meals/" +mealId,updatedMeal  )
+      console.log("UPDATE RESPONSE: "+response)
+      await  setMeals(prevMeals =>
+         prevMeals.map(meal =>
+           meal.id === mealId ? response.data : meal
+         )
+      );
+     //
     }
-  };
-
-
-  useEffect(() => {
-    const fetchMeals = async () => {
-      try {
-        const response = await axios.get(API_URL + "/meals");
-
-        setMeals(response.data); // Store data in state if needed
-      } catch (error) {
-        console.log("FETCH MEALS ERROR!!!!!!!!: ", error);
-      }
-    };
-    fetchMeals(); // Call the async function inside useEffect
-  }, []);
+     catch (error) {
   
+    console.log ("ERROR CREATING MEALS: "+error)
+  
+    }
+  }
   return (
     <>
       <BrowserRouter>
@@ -125,7 +251,6 @@ function App() {
               />
             }
           />
-
           <Route
             path="/login"
             element={
@@ -140,7 +265,6 @@ function App() {
               ></SignIn>
             }
           />
-
           <Route
             path="/create"
             element={
@@ -150,10 +274,10 @@ function App() {
                 setNewName={setNewName}
                 ingredients={ingredients}
                 setIngredients={setIngredients}
+                createMealFunction={createMealFunction}
               />
             }
           />
-
           <Route
             path="/update"
             element={
@@ -164,12 +288,11 @@ function App() {
                 ingredients={ingredients}
                 setIngredients={setIngredients}
                 mealId={mealId}
+                updateMealFunction={updateMealFunction}
               ></Updating>
             }
           />
-
           <Route path="/protected" element={<Protected></Protected>} />
-
           <Route
             path="/meals"
             element={
@@ -184,7 +307,6 @@ function App() {
             }
           />
         </Routes>
-
         <></>
       </BrowserRouter>
     </>

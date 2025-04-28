@@ -76,7 +76,7 @@ const verifyToken = (req, res, next) => {
 const generateTokens = (username, password) => {
   //console.log("USERNAME PASSWORD: "+username+" "+password)
   //console.log("SIGNED !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1")
-  const accessToken = jwt.sign({ username: username, password:password }, SECRET_KEY, { expiresIn: "1m" });
+  const accessToken = jwt.sign({ username: username, password:password }, SECRET_KEY, { expiresIn: "10m" });
   //SECRET_KEY="Bearer "+accessToken
   //console.log("SECRET KEY: ",SECRET_KEY )
   const refreshToken = jwt.sign({ username: username, password:password }, REFRESH_SECRET, { expiresIn: "7d" });
@@ -95,6 +95,8 @@ app.post("/login", async (req, res) => {
 
 app.get("/protected", (req, res) => {
   const authHeader = req.headers.authorization;
+
+  /*
   if (!authHeader) return res.status(401).json({ error: "Token required" });
 
   const token = authHeader.split(" ")[1];
@@ -102,28 +104,8 @@ app.get("/protected", (req, res) => {
   jwt.verify(token, SECRET_KEY, (err, user) => {
       if (err) return res.status(403).json({ error: "Invalid token" });
       res.json({ message: "Sensitive data", user });
-  });
+  });*/
 });
-
-/*WIP
-app.post("/users", async (req,res) => {
-
-  try{
-    const jsonarray = await fs.readFile("jsons/users.json", 'utf-8'); 
-    //const jsonarray =  await readfile("jsons/users.json"); // Await it!
-    let userData = JSON.parse(jsonarray);
-    
-    //const { username, password } = req.body;
-
-   // const result = data.filter((user) =>{user.name == username && user.password==password }   );
-
-    return res.status(201).send({resultMsg: userData}); // Send the actual data
-  }
-  catch(error){
-    console.error("Error fetching users:", error);
-    return res.status(500).json({ error: "Internal server error" });
-  }
-})*/
 
 app.get("/meals", async (req,res) => {
   try{
@@ -135,16 +117,10 @@ app.get("/meals", async (req,res) => {
   console.log("GET MEAL TOKEN: |",token,"|")
   console.log("SECRET KEY: |", SECRET_KEY,"|")
 
-
   jwt.verify(token, SECRET_KEY, async (err,user) => {
       if (err) return res.status(403).json({ error: "Invalid token" });
- 
-
-       
-      const jsonarray =  await readfile("./../client/public/jsons/meals.json"); // Await it!
+      const jsonarray =  await readfile("./jsons/meals.json"); // Await it!
       return res.status(201).json( { array:jsonarray  }  ); // Send the actual data
-     
-   
 
     });
   }
@@ -154,6 +130,81 @@ app.get("/meals", async (req,res) => {
     }
   })
 
+  app.post("/meals", async (req, res) => {
+    try {
+      console.log("Incoming Body:", JSON.stringify(req.body, null, 2)); // Log incoming data
+  
+      const jsonarray = await fs.readFile("./jsons/meals.json", 'utf-8'); 
+      console.log("Raw JSON String:", jsonarray);
+  
+      let data = JSON.parse(jsonarray);
+  
+      const newElement = req.body.newMeal || req.body;
+      console.log("New Element to Add:", newElement);
+  
+      data.push(newElement);
+  
+      await fs.writeFile("./jsons/meals.json", JSON.stringify(data, null, 2));
+  
+      res.status(201).json(data);
+    } catch (error) {
+      console.log("JSON ARRAY Error:", error.message);
+      res.status(500).send({ message: error.message });
+    }
+  });
+  
+  app.put("/meals/:id", async (req, res) => {
+    try {
+      console.log("PUTPUT")
+      const jsonarray = await fs.readFile("./jsons/meals.json", 'utf-8'); 
+      let meals = JSON.parse(jsonarray);
+      const { name, ingredients } = req.body;
+  
+      mealId=  req.params.id
+      console.log("ID:", req.params.id);
+      console.log("Name:", name);
+      console.log("Ingredients (Raw):", ingredients);
+  
+      // Find the meal by ID
+      const mealIndex = meals.findIndex(meal => meal.id == mealId);
+      if (mealIndex === -1) {
+        return res.status(404).json({ message: "Meal not found" });
+      }
+      // Update the meal
+      meals[mealIndex] = { ...meals[mealIndex], name, ingredients };
+      // Save back to file
+      await fs.writeFile("jsons/meals.json", JSON.stringify(meals, null, 2));
+      res.json(meals[mealIndex]);
+  
+    } catch (error) {
+      console.log("JSON ARRAY Error:", error.message);
+      res.status(500).send({ message: error.message });
+    }
+  });
+
+    app.delete("/meals/:id", async (req, res) => {
+  
+      try {
+        console.log("Incoming Body:",req.params); // Log incoming data
+        const jsonarray = await fs.readFile("jsons/meals.json", 'utf-8'); 
+        let data = JSON.parse(jsonarray);
+  
+        const id = req.params.id;
+        console.log("id to delete:", id);
+        const result = data.filter((meal) => meal.id != id);
+  
+        console.log("|||||||||||||RESULT: "+result)
+  
+        await fs.writeFile("jsons/meals.json", JSON.stringify(result, null, 2));
+    
+        // Respond with the updated data
+        res.status(201).json(result);
+        
+      } catch (error) {
+        console.log("JSON ARRAY Error:", error.message);
+        res.status(500).send({ message: error.message });
+      }
+    });
 
 app.post("/refresh", (req, res) => {
   try{
@@ -187,83 +238,7 @@ res.status(200).send({
 )
 })
 
-  app.delete("/meals/:id", async (req, res) => {
 
-    try {
-      console.log("Incoming Body:",req.params); // Log incoming data
-      const jsonarray = await fs.readFile("jsons/meals.json", 'utf-8'); 
-      let data = JSON.parse(jsonarray);
-
-      const id = req.params.id;
-      console.log("id to delete:", id);
-      const result = data.filter((meal) => meal.id != id);
-
-      console.log("|||||||||||||RESULT: "+result)
-
-      await fs.writeFile("jsons/meals.json", JSON.stringify(result, null, 2));
-  
-      // Respond with the updated data
-      res.status(201).json(result);
-      
-    } catch (error) {
-      console.log("JSON ARRAY Error:", error.message);
-      res.status(500).send({ message: error.message });
-    }
-  });
-
-    app.post("/meals", async (req, res) => {
-      try {
-        console.log("Incoming Body:", JSON.stringify(req.body, null, 2)); // Log incoming data
-    
-        const jsonarray = await fs.readFile("jsons/meals.json", 'utf-8'); 
-        console.log("Raw JSON String:", jsonarray);
-    
-        let data = JSON.parse(jsonarray);
-  
-        const newElement = req.body.newMeal || req.body;
-        console.log("New Element to Add:", newElement);
-
-        data.push(newElement);
-    
-        await fs.writeFile("jsons/meals.json", JSON.stringify(data, null, 2));
-    
-        res.status(201).json(data);
-      } catch (error) {
-        console.log("JSON ARRAY Error:", error.message);
-        res.status(500).send({ message: error.message });
-      }
-    });
-    
-    app.put("/meals/:id", async (req, res) => {
-      try {
-
-        const jsonarray = await fs.readFile("./../public/jsons/meals.json", 'utf-8'); 
-        let meals = JSON.parse(jsonarray);
-        const { name, ingredients } = req.body;
-
-        mealId=  req.params.id
-        console.log("ID:", req.params.id);
-        console.log("Name:", name);
-        console.log("Ingredients (Raw):", ingredients);
-
-        // Find the meal by ID
-        const mealIndex = meals.findIndex(meal => meal.id == mealId);
-        if (mealIndex === -1) {
-          return res.status(404).json({ message: "Meal not found" });
-        }
-
-        // Update the meal
-        meals[mealIndex] = { ...meals[mealIndex], name, ingredients };
-
-        // Save back to file
-        await fs.writeFile("jsons/meals.json", JSON.stringify(meals, null, 2));
-        res.json(meals[mealIndex]);
-
-      } catch (error) {
-        console.log("JSON ARRAY Error:", error.message);
-        res.status(500).send({ message: error.message });
-      }
-    });
   
 app.get("/users", async (req,res) => {
 
