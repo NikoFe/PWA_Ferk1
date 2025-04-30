@@ -130,6 +130,29 @@ app.get("/meals", async (req,res) => {
     }
   })
 
+  app.get("/meals/:id", async (req,res) => {
+    try{
+      mealId=  req.params.id
+      res.status(201).json(mealId);
+    }
+      catch(error){
+        console.error("GET SINGLE MEAL ERROR:", error);
+        return res.status(500).json({ error: "Internal server error" });
+      }
+    })
+  
+
+
+
+
+
+
+
+
+
+
+
+
   app.post("/meals", async (req, res) => {
     try {
       console.log("Incoming Body:", JSON.stringify(req.body, null, 2)); // Log incoming data

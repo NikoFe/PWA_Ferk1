@@ -37,54 +37,9 @@ const Creating = ({ setMeals,newName, setNewName,ingredients, setIngredients, cr
    
     console.log("useEffect");
     setShowCreation(true)
-
-
-
-
    // fetchProtectedData();
   }, []);
 
-   /*
-  const createMealFunction= async (newMeal) => {
-    console.log("NEWNEWNEW: "+JSON.stringify(newMeal));
-    if (!navigator.onLine) {
-      try{
-    console.log("MEAL CREATE OFFLINE")
-    let i=1;
-    let createString="create"+i;
-    while(localStorage.getItem(createString)!=""  && localStorage.getItem(createString)){
-    console.log("~~~~~~~~~~~~~",createString,"~~~~~~~~~~~~~" )
-    console.log("^^^^^^^",localStorage.getItem(createString),"^^^^^^^")
-    i++;
-    createString="create"+i;
-    }
-    localStorage.setItem(createString, JSON.stringify(newMeal))
-  
-    }
-    catch (err) {
-      {
-        alert("OFFLINE UPDATE ERROR!!!");
-        console.error(err);
-      }
-    }
-    }  //OFFLINE
-   else {
-
-    console.log("CREATING MEALS");
-    try {
-      const response = await axios.post(API_URL + "/meals", {
-        newMeal: newMeal,
-      })
-      console.log("!!!!!!!!!!!!!!!!!CREATING RESPONSE: " +  response.data);
-      //alert("GETTING")
-    } catch (error) {
-  
-    console.log ("ERROR CREATING MEALS: "+error)
-
-    }
-  }
-  }
-  */
   const creatingFunction = (
 ) => {
     let filled =true;

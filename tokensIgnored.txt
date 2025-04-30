@@ -1,3 +1,9 @@
-protected in app.js
+protected in app.js in creating
+
+protected in app.js in updating
 
 fix double create when offline
+
+fix singleMeal offline functions
+
+singleMeal on clicking the meal

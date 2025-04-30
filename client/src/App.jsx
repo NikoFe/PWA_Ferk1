@@ -8,8 +8,18 @@ import Home from "./components/Home";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Protected from "./components/Protected";
 import Meals from "./components/Meals";
+import { useNavigate } from "react-router-dom";
+import KeyHandler from "./components/KeyHandler";
+import SingleMeal from "./components/SingleMeal";
 
-//const API_URL="h"
+
+//<link rel="stylesheet" type="text/css" href="path/to/notifications.css"></link>
+
+//class Example extends React.Component {
+//}
+
+
+
 const API_URL = "http://localhost:3000";
 
 if ("serviceWorker" in navigator) {
@@ -20,17 +30,17 @@ if ("serviceWorker" in navigator) {
       .catch(err => console.log("Service Worker not registered", err));
   });
 }
-
 const getEntry = async () => {
   console.log("GETTING");
   try {
     const response = await axios.get(API_URL + "/statistics");
     console.log("RESPONSE: " + response[0]);
-    //alert("GETTING")
   } catch (error) {}
 };
 
+
 function App() {
+
   const [loggedIn, setLoggedIn] = useState(0);
   const [meals, setMeals] = useState([]);
   const [refresh, setRefresh] = useState(true);
@@ -41,68 +51,136 @@ function App() {
     { name: "", amount: 0, calories: 0 },
     { name: "", amount: 0, calories: 0 },
   ]);
+  const [filterName, setFilterName] = useState("");
+  const [filterId, setFilterId] = useState(0);
+  const [filterIngredients, setFilterIngredients ]=useState([
+    { name: "", amount: 0, calories: 0 },
+    { name: "", amount: 0, calories: 0 },
+    { name: "", amount: 0, calories: 0 },
+  ])
+
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [isOnline, setIsOnline]= useState(true)
-
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   const handleCheck = ()=>{
-    console.log("ONLINE CHECK!!!!!!!!!!!!!!!!!!")
     setIsOnline(navigator.isOnline)
-
     if(navigator.isOnline){
       console.log(    navigator.isOnline)
-      console.log("*** IS ONLINE")
     }
     else{
-      console.log(    navigator.isOnline)
-      console.log("*** NOT ONLINE ******************************************************************************")
-
-         
-
             let i=1
+            let updateString="update"+i;
+            while(localStorage.getItem(updateString)!=""  && localStorage.getItem(updateString)){
+
+                let parsedCreate = JSON.parse(localStorage.getItem(updateString)); // just parse directly!
+                console.log("UPDATINGUPDATINGUPDATINGUPDATINGUPDATING")
+                updateMealFunction(parsedCreate.id,parsedCreate.name,parsedCreate.ingredients,true );
+                localStorage.removeItem(updateString)
+                i++;
+                updateString="update"+i;
+                }
+            i=1
+            let deleteString="delete"+i;
+            while(localStorage.getItem(deleteString)!=""  && localStorage.getItem(deleteString)){
+
+                //let parsedDelete = JSON.parse(localStorage.getItem(deleteString)); // just parse directly!
+                console.log("DELETEDELETEDELETEDELETEDELETEDELETE")
+                deleteMeal(localStorage.getItem(deleteString));
+                localStorage.removeItem(deleteString)
+                i++;
+                deleteString="update"+i;
+                }
+            i=1
             let createString="create"+i;
-            console.log(localStorage.getItem(createString))
-            console.log(localStorage.getItem(createString="create"+i))
             while(localStorage.getItem(createString)!=""  && localStorage.getItem(createString)){
 
+            let parsedCreate = JSON.parse(localStorage.getItem(createString)); // just parse directly!
+            console.log("CREATINGCREATINGCREATINGCREATINGCREATINGCREATINGCREATINGCREATINGCREATINGCREATING")
+            createMealFunction(parsedCreate);
+            localStorage.removeItem(createString)
 
-
-                let parsedCreate = JSON.parse(localStorage.getItem(createString)); // just parse directly!
-                console.log("CREATINGCREATINGCREATINGCREATINGCREATINGCREATINGCREATINGCREATINGCREATINGCREATING")
-                createMealFunction(parsedCreate);
-                localStorage.removeItem(createString)
-
-     
-          //  createMealFunction(parsedCreate)
-
-                i++;
-                createString="create"+i;
-        
+            i++;
+            createString="create"+i;
             }
-          
-      console.log("********************************************************************************")
 
+
+      console.log("********************************************************************************")
     }
+  }
+  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  const updateMealFunction= async (paramId, paramName, paramIngredients, isParams) => {//////////////////////////////////////////////////////////////////
+    //console.log("updating: "+JSON.stringify(newMeal));
+    if (!navigator.onLine) {
+      try{
+    console.log("MEAL UPDATE OFFLINE")
+    let i=1;
+    let updateString="update"+i;
+    while(localStorage.getItem(updateString)!=""  && localStorage.getItem(updateString)){
+    //console.log("~~~~~~~~~~~~~",updateString,"~~~~~~~~~~~~~" )
+    //console.log("^^^^^^^",localStorage.getItem(updateString),"^^^^^^^")
+    i++;
+    updateString="update"+i;
+    }
+    const updatedMeal = {
+      id: mealId,
+      name: newName,
+      ingredients,
+    };
+    console.log("storing new IIIII: ",JSON.stringify(updatedMeal) )
+    localStorage.setItem(updateString, JSON.stringify(updatedMeal))
+    }
+    catch (err) {
+      {
+        alert("OFFLINE UPDATE ERROR!!!");
+       // navigate("/")
+        console.error(err);
+      }
+    }
+    }  //OFFLINE
+    else {
+    try {
+      let updatedMeal = {
+        id: mealId,
+        name: newName,
+        ingredients,
+      };
+    
+    if(isParams) {
+       updatedMeal = {
+        id: paramId,
+        name: paramName,
+        ingredients:paramIngredients,
+      };
+    }
+    console.log("URL: "+API_URL + "/meals/" +mealId,updatedMeal)
+    const response = await axios.put(API_URL + "/meals/" +updatedMeal.id,updatedMeal  )
+    console.log("UPDATE RESPONSE: "+response)
+    await  setMeals(prevMeals =>
+       prevMeals.map(meal =>
+         meal.id === updatedMeal.id ? response.data : meal
+       )
+    );
+    }
+     catch (error) {
+    console.log ("ERROR CREATING MEALS: "+error)
+    }
+  }
   }
 
   useEffect(() => {
-   // window.addEventListener('online',   console.log("ONLINE CHECK: !" ));
-     //handleCheck()
-    //return () => window.removeEventListener('online', fetchProtectedData);
    window.addEventListener("online",handleCheck )
-  // window.addEventListener("offline",handleCheck )
   }, []);
-  
+  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   const deleteMeal = async (idParam) => {
+    console.log("DELETING idParam: ", idParam)
     if (!navigator.onLine) {
       try{
     console.log("MEAL DELETE OFFLINE")
     let i=1;
     let deleteString="delete"+i;
     while(localStorage.getItem(deleteString)!=""  && localStorage.getItem(deleteString)){
-    //console.log("~~~~~~~~~~~~~",deleteString,"~~~~~~~~~~~~~" )
-    //console.log("^^^^^^^",localStorage.getItem(deleteString),"^^^^^^^")
     i++;
     deleteString="delete"+i;
     }
@@ -114,10 +192,8 @@ function App() {
         console.error(err);
       }
     }
-    }  
+    }//OFFLINE
     else {
-    
-    //OFFLINE
     console.log("DELETING " + API_URL + "/meals/" + idParam);
     try {
       const response = await axios.delete(API_URL + "/meals/" + idParam);
@@ -128,6 +204,7 @@ function App() {
     }
   }
   };
+  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   const createMealFunction= async (newMeal) => {
     console.log("NEWNEWNEW: "+JSON.stringify(newMeal));
     if (!navigator.onLine) {
@@ -176,64 +253,10 @@ function App() {
     fetchMeals(); // Call the async function inside useEffect
   }, []);
   
-  const updateMealFunction= async () => {//////////////////////////////////////////////////////////////////
-    //console.log("updating: "+JSON.stringify(newMeal));
-    if (!navigator.onLine) {
-      try{
-    console.log("MEAL UPDATE OFFLINE")
-
-    let i=1;
-    let updateString="update"+i;
-    while(localStorage.getItem(updateString)!=""  && localStorage.getItem(updateString)){
-    //console.log("~~~~~~~~~~~~~",updateString,"~~~~~~~~~~~~~" )
-    //console.log("^^^^^^^",localStorage.getItem(updateString),"^^^^^^^")
-    i++;
-    updateString="update"+i;
-    }
-    const updatedMeal = {
-      id: mealId,
-      name: newName,
-      ingredients,
-    };
-    console.log("storing new IIIII: ",updateString )
-    localStorage.setItem(updateString, JSON.stringify(updatedMeal))
-    }
-    catch (err) {
-      {
-        alert("OFFLINE UPDATE ERROR!!!");
-      
-       // navigate("/")
-        console.error(err);
-      }
-    }
-    }  //OFFLINE
-    console.log("UPDATING MEALS");
-    try {
-
-      const updatedMeal = {
-        id: mealId,
-        name: newName,
-        ingredients,
-      };
-      console.log("URL: "+API_URL + "/meals/" +mealId,updatedMeal)
-      const response = await axios.put(API_URL + "/meals/" +mealId,updatedMeal  )
-      console.log("UPDATE RESPONSE: "+response)
-      await  setMeals(prevMeals =>
-         prevMeals.map(meal =>
-           meal.id === mealId ? response.data : meal
-         )
-      );
-     //
-    }
-     catch (error) {
-  
-    console.log ("ERROR CREATING MEALS: "+error)
-  
-    }
-  }
   return (
     <>
       <BrowserRouter>
+       <KeyHandler />
         <Routes>
           <Route
             path="/"
@@ -292,6 +315,7 @@ function App() {
               ></Updating>
             }
           />
+
           <Route path="/protected" element={<Protected></Protected>} />
           <Route
             path="/meals"
@@ -303,12 +327,41 @@ function App() {
                 setMealId={setMealId}
                 setMeals={setMeals}
                 deleteMeal={deleteMeal}
+                filterName={filterName}
+                filterId={filterId}
+                filterIngredients={filterIngredients}
+                setFilterName={setFilterName}
+                setFilterId={setFilterId}
+                setFilterIngredients={setFilterIngredients}
               ></Meals>
+
             }
           />
+
+           (filterId,filterName,filterIngredients,setNewName,setIngredients,setMealId,deleteMeal) 
+
+          <Route
+            path="/meals/:id"
+            element={
+              <SingleMeal
+                filterId={filterId}
+                filterName={filterName}
+                filterIngredients={filterIngredients}
+                setNewName={setNewName}
+                setIngredients={setIngredients}
+                setMealId={setMealId}
+                deleteMeal={deleteMeal}
+              ></SingleMeal>
+
+            }
+          />
+
+
+
         </Routes>
         <></>
       </BrowserRouter>
+  
     </>
   );
 }

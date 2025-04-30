@@ -57,15 +57,21 @@
 }
 
 
-
-.horizontal-flex{
-
-
-
-}
-
 .creating-ingredient{
   display:flex;
   height: fit-content;
   padding: 10px;
+}
+
+.meal-filter-div{
+
+  display:flex;
+  flex-direction: column;
+  width:fit-content;
+  margin:auto;
+  margin-bottom:20px
+}
+.meal-filter-div button{
+
+  margin-top:20px
 }

@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import Meals from "./Meals";
 import { useEffect, useState } from "react";
 
+
+
 const Home = ({
   getEntry,
   setNewName,
@@ -15,7 +17,9 @@ const Home = ({
   setMeals,
 }) => {
   const navigate = useNavigate();
+
   const API_URL = "http://localhost:3000";
+
 
   return (
     <>
