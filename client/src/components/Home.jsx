@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 
 
 const Home = ({
+  triggerPush,
   getEntry,
   setNewName,
   setIngredients,
@@ -130,7 +131,8 @@ const Home = ({
         SHOW CACHE
       </button>
 
-
+    
+ 
       <button
         onClick={() => {
         console.log("DELETE CACHE")
@@ -139,7 +141,9 @@ const Home = ({
       >
         DELETE CACHE
       </button>
-
+        <div style={{ padding: "2rem" }}>
+          <button onClick={triggerPush}>Trigger Push</button>
+      </div>
 
 
 

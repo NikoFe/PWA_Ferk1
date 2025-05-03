@@ -5,7 +5,10 @@ const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
+const webpush = require("web-push");
+const bodyParser = require("body-parser");
 require("dotenv").config();
+const fs2 = require("fs");
 
 //const fs = require('fs')
 const REFRESH_TOKENS = new Set();
@@ -22,6 +25,7 @@ app.use(
     credentials: true, // Allow credentials (cookies, authorization headers)
   })
 );
+app.use(bodyParser.json());
 
 
 const PORT = 3000;
@@ -45,6 +49,118 @@ app.use((req, res, next) => {
 //**************************************//
 
 
+//////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+const VAPID_KEYS = webpush.generateVAPIDKeys();
+
+webpush.setVapidDetails(
+  "mailto:niko.ferk@student.com",
+  VAPID_KEYS.publicKey,
+  VAPID_KEYS.privateKey
+);
+
+// Store subscriptions
+const SUB_FILE = "./subscriptions.json";
+
+// Read subscriptions
+const readSubscriptions = () => {
+  if (!fs2.existsSync(SUB_FILE)) {
+    console.log("File does not exist, returning empty array.");
+    return [];
+  }
+
+  try {
+    const content = fs2.readFileSync(SUB_FILE, "utf-8");
+    if (!content.trim()) {
+      // File is empty or whitespace
+      return [];
+    }
+    return JSON.parse(content);
+  } catch (err) {
+    console.error("Failed to read subscriptions:", err);
+    return [];
+  }
+};
+
+// Save subscriptions
+const saveSubscriptions = (subs) => {
+  fs2.writeFileSync(SUB_FILE, JSON.stringify(subs, null, 2));
+};
+
+// Subscribe route
+app.post("/subscribe", (req, res) => {
+  console.log("A")
+  const subs = readSubscriptions();
+  const newSub = req.body;
+  console.log("B")
+  console.log("newSub: ",newSub)
+  // Avoid duplicates
+  if (!subs.find(s => s.endpoint === newSub.endpoint)) {
+    console.log("sub denied!")
+    subs.push(newSub);
+    saveSubscriptions(subs);
+  }
+
+  res.status(201).json({ message: "Subscribed" });
+});
+
+// Trigger notification
+app.post("/notify", async (req, res) => {
+  const subs = readSubscriptions();
+  const payload = JSON.stringify({ title: "Push Test 222", body: "Hello from server222!" });
+
+  for (let sub of subs) {
+    try {
+      await webpush.sendNotification(sub, payload);
+    } catch (err) {
+      console.error("Push Error", err);
+    }
+  }
+
+  res.status(200).json({ message: "Notifications sent" });
+});
+
+// Trigger notification
+app.post("/notifyCreate", async (req, res) => {
+  const subs = readSubscriptions();
+  const payload = JSON.stringify({ title: "SUCCESS!", body: "Meal successfuly created!" });
+
+  for (let sub of subs) {
+    try {
+      await webpush.sendNotification(sub, payload);
+    } catch (err) {
+      console.error("Push Error", err);
+    }
+  }
+
+  res.status(200).json({ message: "Notifications sent" });
+});
+app.post("/notifyError", async (req, res) => {
+  const subs = readSubscriptions();
+  const payload = JSON.stringify({ title: "ERROR!", body: "Error creating!" });
+
+  for (let sub of subs) {
+    try {
+      await webpush.sendNotification(sub, payload);
+    } catch (err) {
+      console.error("Push Error", err);
+    }
+  }
+
+  res.status(200).json({ message: "Notifications sent" });
+});
+
+
+
+
+
+
+// Send VAPID key
+app.get("/vapidPublicKey", (req, res) => {
+  res.send(VAPID_KEYS.publicKey);
+});
+//////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
 const readfile = async (path) => {
   try {
     const data = await fs.readFile(path, 'utf-8');
@@ -141,18 +257,6 @@ app.get("/meals", async (req,res) => {
       }
     })
   
-
-
-
-
-
-
-
-
-
-
-
-
   app.post("/meals", async (req, res) => {
     try {
       console.log("Incoming Body:", JSON.stringify(req.body, null, 2)); // Log incoming data
@@ -253,7 +357,6 @@ catch(error){
 }
 });
 
-
 app.get("/statistics", (req,res) => {
 res.status(200).send({
  message: "SUCCESS"
@@ -261,8 +364,6 @@ res.status(200).send({
 )
 })
 
-
-  
 app.get("/users", async (req,res) => {
 
 try{

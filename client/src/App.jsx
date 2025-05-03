@@ -11,14 +11,12 @@ import Meals from "./components/Meals";
 import { useNavigate } from "react-router-dom";
 import KeyHandler from "./components/KeyHandler";
 import SingleMeal from "./components/SingleMeal";
-
+import { urlBase64ToUint8Array } from "./utils";
 
 //<link rel="stylesheet" type="text/css" href="path/to/notifications.css"></link>
 
 //class Example extends React.Component {
 //}
-
-
 
 const API_URL = "http://localhost:3000";
 
@@ -59,11 +57,70 @@ function App() {
     { name: "", amount: 0, calories: 0 },
   ])
 
-
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [isOnline, setIsOnline]= useState(true)
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  useEffect(() => {
+    async function setupPush() {
+      if (!("serviceWorker" in navigator) || !("PushManager" in window)) return;
+
+      const reg = await navigator.serviceWorker.register("./public/serviceWorker.js");
+      console.log("REG: |||||||", reg,"||||||||||||||||")
+      const res = await fetch("http://localhost:3000/vapidPublicKey");
+      console.log("SETUP push: ",res)
+      const vapidPublicKey = await res.text();
+      const convertedVapidKey = urlBase64ToUint8Array(vapidPublicKey);
+      console.log("Converted key: ",convertedVapidKey)
+      const sub = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: convertedVapidKey
+      });
+      console.log("sub before subscribe: ",sub)
+      await fetch("http://localhost:3000/subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(sub)
+      });
+    }
+
+    setupPush();
+  }, []);
+
+
+  
+  const triggerPush = async () => {
+   const res = await fetch("http://localhost:3000/notify", { method: "POST" });
+    console.log("triggerPush response: "+res)
+  };
+  
+  const createPush = async () => {
+    const res = await fetch("http://localhost:3000/notifyCreate", { method: "POST" });
+    console.log("CREATING NOTIFY")
+    console.log("triggerPush response: "+res)
+  };
+  const errorPush = async () => {
+    const res = await fetch("http://localhost:3000/notifyError", { method: "POST" });
+
+    console.log("triggerPush response: "+res)
+  };
+
+
+
+/*
+  const errorPush = async () => {
+    res = await fetch("http://localhost:3000/notifyError", { method: "POST" });
+
+    console.log("triggerPush response: "+res)
+  };
+*/
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
   const handleCheck = ()=>{
     setIsOnline(navigator.isOnline)
     if(navigator.isOnline){
@@ -234,10 +291,12 @@ function App() {
       const response = await axios.post(API_URL + "/meals", {
         newMeal: newMeal,
       })
+      createPush();
       console.log("!!!!!!!!!!!!!!!!!CREATING RESPONSE: " +  response.data);
       //alert("GETTING")
     } catch (error) {
     console.log ("ERROR CREATING MEALS: "+error)
+    errorPush();
     }
   }
   }
@@ -262,6 +321,7 @@ function App() {
             path="/"
             element={
               <Home
+                triggerPush={triggerPush}
                 getEntry={getEntry}
                 setNewName={setNewName}
                 setIngredients={setIngredients}

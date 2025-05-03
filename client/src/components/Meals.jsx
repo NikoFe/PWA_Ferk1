@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-
+import LazyImage from "./LazyImage";
 
 
 const Meals = ({ meals, setNewName, setIngredients, setMealId, setMeals, deleteMeal,filterName,filterId,filterIngredients,setFilterName, setFilterId,setFilterIngredients }) => {
@@ -42,17 +42,6 @@ const Meals = ({ meals, setNewName, setIngredients, setMealId, setMeals, deleteM
   }
 
   }
-
-
-
-
-
-
-
-
-
-
-
   const fetchProtectedData = async () => {
    
     if (!navigator.onLine) {
@@ -148,7 +137,7 @@ const Meals = ({ meals, setNewName, setIngredients, setMealId, setMeals, deleteM
         {meals.map((meal, index) => (
           
           <div key={index} className="ingredient-div">
-
+          <LazyImage src={"images/meal.png"} alt={`Meal image`} height={100} width={100}  />
 
             <strong> {meal.name} </strong>
 
@@ -159,6 +148,7 @@ const Meals = ({ meals, setNewName, setIngredients, setMealId, setMeals, deleteM
               </p>
             ))}
             <div className="horizontal-flex">
+
               <strong>MEAL ID: {meal.id} </strong>
               <button
                 onClick={() => {
